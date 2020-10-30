@@ -21,16 +21,38 @@ void generate_file()
 {
 	string filename = "generated.txt";
 	std::ofstream ostrm(filename, std::ios::binary);
-
-	int str_count = 100 + random_number(50);
-	for (int i = 0; i < str_count; i++)
+	if (!ostrm.is_open()) 
 	{
-		int str_len = random_number();
-		for (int j = 0; j < str_len; j++)
+    	std::cout << "failed to open " << filename << '\n';
+    } 
+    else
+    {
+		int str_count = 100 + random_number(50);
+		for (int i = 0; i < str_count; i++)
 		{
-			ostrm << j % 10;
+			int str_len = random_number();
+			for (int j = 0; j < str_len; j++)
+			{
+				ostrm << j % 10;
+			}
+			ostrm << '\n';
 		}
-		ostrm << '\n';
+	}
+}
+
+void split_file_into_packets()
+{
+	string filename = "generated.txt";
+	std::ifstream istrm(filename, std::ios::binary);
+	if (!istrm.is_open()) 
+	{
+    	std::cout << "failed to open " << filename << '\n';
+    } 
+    else
+    {
+     	string s;
+		while (istrm >> s) 
+			cout << s << '\n';
 	}
 }
 
@@ -40,6 +62,7 @@ int main(int ac, char* av[])
 	desc.add_options()
 	    ("help", "shows this help message")
 	    ("generate", "generate file")
+	    ("split", "split file")
 	;
 
 	po::variables_map vm;
@@ -59,6 +82,11 @@ int main(int ac, char* av[])
 	{
 	    cout << "Щас будем генерировать файл " << ".\n";
 	    generate_file();
+	} 
+	if (vm.count("split")) 
+	{
+	    cout << "Щас будем разбивать на пакеты " << ".\n";
+	    split_file_into_packets();
 	} 
 	
 }
