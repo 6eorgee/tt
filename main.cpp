@@ -8,6 +8,7 @@
 using namespace std;
 namespace po = boost::program_options;
 
+std::vector<std::string> v;
 
 int random_number(int max = 10 * MAX_PACKET_SIZE)
 {
@@ -40,6 +41,18 @@ void generate_file()
 	}
 }
 
+std::string leading_zeroes(int i)
+{
+	if (i < 10)
+		return "000" + to_string(i);
+	else if (i < 100)
+		return "00" + to_string(i);
+	else if (i < 1000)
+		return "0" + to_string(i);
+	else
+		return to_string(i);
+}
+
 void split_file_into_packets()
 {
 	string filename = "generated.txt";
@@ -50,9 +63,18 @@ void split_file_into_packets()
     } 
     else
     {
-     	string s;
-		while (istrm >> s) 
-			cout << s << '\n';
+		int i = 1;
+     	char s[95];
+		//istringstream s(95, '\0'); 
+
+		while (istrm >> s)
+		{
+			v.push_back(leading_zeroes(i) + "_" + s);
+			i++;
+		}
+
+		for (auto elem : v)
+			cout << elem << endl;
 	}
 }
 
