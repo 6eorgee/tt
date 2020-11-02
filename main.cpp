@@ -100,7 +100,9 @@ void split_file_into_packets()
 	{
 		for (auto elem : v)
 		{
-			ostrm << elem.a << '\n';
+			ostrm.write(elem.a, MAX_PACKET_SIZE);
+			ostrm << '\n';
+			//ostrm << elem.a << '\n';
 		}
 	}
 }
@@ -121,7 +123,9 @@ void shuffle_packets()
 	{
 		for (auto elem : v)
 		{
-			ostrm << elem.a << '\n';
+			ostrm.write(elem.a, MAX_PACKET_SIZE);
+			ostrm << '\n';
+			//ostrm << elem.a << '\n';
 		}
 	}
 }
