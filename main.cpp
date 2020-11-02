@@ -16,6 +16,10 @@ struct Packet {
 	char a[MAX_PACKET_SIZE];
 };
 
+struct DecodedPacket {
+	char a[MAX_PACKET_SIZE - HEADER_SIZE];
+};
+
 std::vector<Packet> v;
 
 int random_number(int max = 10 * MAX_PACKET_SIZE)
@@ -48,7 +52,7 @@ void generate_file()
 	} 
 	else
 	{
-		int str_count = 7;//MIN_STRINGS_CNT + random_number(50);
+		int str_count = MIN_STRINGS_CNT + random_number(50);
 		for (int i = 0; i < str_count; i++)
 		{
 			int str_len = random_number();
@@ -102,7 +106,6 @@ void split_file_into_packets()
 		{
 			ostrm.write(elem.a, MAX_PACKET_SIZE);
 			ostrm << '\n';
-			//ostrm << elem.a << '\n';
 		}
 	}
 }
@@ -124,8 +127,68 @@ void shuffle_packets()
 		for (auto elem : v)
 		{
 			ostrm.write(elem.a, MAX_PACKET_SIZE);
-			ostrm << '\n';
-			//ostrm << elem.a << '\n';
+		}
+	}
+}
+
+void collect()
+{
+	std::map<int, DecodedPacket> map;
+	std::string fname = "shuffled.txt";
+	std::ifstream istm(fname, std::ios::binary);
+	int packet_number = 0;
+	if (!istm.is_open())
+	{
+		std::cout << "failed to open " << fname << '\n';
+	}
+	else
+	{
+		while (!istm.eof())
+		{
+			DecodedPacket p;
+			char str[100] = {};
+			char header[4];
+			istm.read(str, MAX_PACKET_SIZE);
+			memcpy(header, str, 4);
+			memcpy(&p, str + HEADER_SIZE, MAX_PACKET_SIZE - HEADER_SIZE);
+			try
+			{
+				packet_number = std::stoi(header);
+			}
+			catch (...)
+			{
+				std::cout << header;
+			}
+			if (packet_number == 0 || p.a[0] == '\0') continue;
+			map[packet_number] = p;
+		}
+	}
+	istm.close();
+
+	fname = "collected.txt";
+	std::ofstream ostm(fname, std::ios::binary);
+	if (!ostm.is_open())
+	{
+		std::cout << "failed to open " << fname << '\n';
+	}
+	else
+	{
+		unsigned int i = 1;
+		for (auto elem : map)
+		{
+			if (i == map.size())
+			{
+				for (auto el : elem.second.a)
+				{
+					if (el > 0)
+						ostm << el;
+				}
+			}
+			else
+			{
+				ostm.write(elem.second.a, MAX_PACKET_SIZE - HEADER_SIZE);
+			}
+			i++;
 		}
 	}
 }
@@ -138,6 +201,7 @@ int main(int ac, char* av[])
 		("generate", "generate file")
 		("split", "split file")
 		("shuffle", "shuffle packets")
+		("collect", "collect packets back")
 	;
 
 	po::variables_map vm;
@@ -169,5 +233,10 @@ int main(int ac, char* av[])
 		split_file_into_packets();
 		cout << "Перемешиваем" << "\n";
 		shuffle_packets();
+	} 
+	if (vm.count("collect")) 
+	{
+		cout << "Собираем обратно" << "\n";
+		collect();
 	} 
 }
